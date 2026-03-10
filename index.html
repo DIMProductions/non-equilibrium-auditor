@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>non-equilibrium-auditor | Interactive UI</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --panel: #18181b;
+      --panel2: #0f0f12;
+      --border: #27272a;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --cyan: #67e8f9;
+      --amber: #fbbf24;
+      --green: #4ade80;
+      --red: #f87171;
+      --purple: #c084fc;
+      --blue: #60a5fa;
+    }
+    * { box-sizing: border-box; min-width: 0; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body { overflow-x: clip; }
+    .container {
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 14px;
+      overflow-x: hidden;
+    }
+    .card {
+      width: 100%;
+      max-width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      box-shadow: 0 18px 42px rgba(0,0,0,.28);
+    }
+    .title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .stats, .toolbar, .toggleRow, .btnRow, .grid2, .grid3, .inspectorGrid, .triple {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 100%;
+    }
+    @media (min-width: 900px) {
+      .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .toggleRow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .btnRow { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid3 { grid-template-columns: 1.1fr .9fr 1fr; }
+      .inspectorGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .triple { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .stat, .field, .mini, .box, .warnBox {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    .warnBox {
+      border-color: rgba(248,113,113,.35);
+      color: #ffd6d6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .okBox {
+      border-color: rgba(74,222,128,.35);
+      color: #d9ffe6;
+    }
+    .label, .field label, .miniK {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 6px;
+    }
+    .value, .miniV {
+      font-size: 22px;
+      font-weight: 800;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: #09090b;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--text);
+      outline: none;
+    }
+    .field textarea { min-height: 120px; resize: vertical; }
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btnMain { background: white; color: black; }
+    .btnAlt { background: #27272a; color: white; }
+    .btnCyan { background: var(--cyan); color: black; }
+    .btnGreen { background: var(--green); color: #07130b; }
+    .toggleChip {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    canvas {
+      display: block;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 250px !important;
+      background: var(--panel2);
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .sectionTitle {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .candidate {
+      width: 100%;
+      text-align: left;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      color: var(--text);
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .candidate.active {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 1px rgba(103,232,249,.25) inset;
+    }
+    .candidateTitle {
+      font-weight: 800;
+      margin-bottom: 4px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid var(--border);
+      margin-right: 6px;
+      margin-top: 6px;
+      max-width: 100%;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .hf { background: rgba(103,232,249,.15); color: var(--cyan); }
+    .lf { background: rgba(251,191,36,.15); color: var(--amber); }
+    .high { background: rgba(74,222,128,.15); color: var(--green); }
+    .low { background: rgba(161,161,170,.15); color: #e4e4e7; }
+    .bad { background: rgba(248,113,113,.15); color: var(--red); }
+    .metric { margin-top: 12px; }
+    .metricHead {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 5px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #27272a;
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+    }
+    .tableWrap, .rawWrap { width: 100%; max-width: 100%; overflow-x: auto; border-radius: 12px; }
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 10px;
+      text-align: left;
+      font-size: 13px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      vertical-align: top;
+    }
+    th { color: var(--muted); }
+    textarea.mono {
+      width: 100%;
+      max-width: 100%;
+      min-height: 180px;
+      background: #0b0b0d;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #e4e4e7;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      resize: vertical;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      overflow: auto;
+    }
+    .verdictMain {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .verdictSub {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .interpList {
+      margin: 8px 0 0 0;
+      padding-left: 18px;
+      line-height: 1.7;
+      color: #d4d4d8;
+    }
+    .summaryText {
+      color: #d4d4d8;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .classTitle {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #f3f4f6;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="title">Non-Equilibrium Event Auditor UI v7</div>
+    <div class="sub">Audit-first interface for structural transition events in multichannel time-series data.
+This version can work three ways:
+1) load a full result.json
+2) load raw CSV and run Quick Audit in-browser
+3) synthesize demo waveforms with target / artifact / drift / hum injection</div>
+
+    <div class="stats">
+      <div class="stat"><div class="label">Total Events</div><div class="value" id="statTotal">0</div></div>
+      <div class="stat"><div class="label">HIGH</div><div class="value" id="statHigh">0</div></div>
+      <div class="stat"><div class="label">HF Events</div><div class="value" id="statHF">0</div></div>
+      <div class="stat"><div class="label">LF Events</div><div class="value" id="statLF">0</div></div>
+    </div>
+
+    <div class="btnRow" style="margin-top:12px;">
+      <button class="btnMain" id="loadResultBtn">Load result.json</button>
+      <button class="btnAlt" id="loadCsvBtn">Load raw CSV</button>
+      <button class="btnGreen" id="runQuickBtn">Run Quick Audit</button>
+      <button class="btnAlt" id="loadDemoBtn">Load Demo result</button>
+      <button class="btnCyan" id="makeSyntheticBtn">Generate Synthetic</button>
+    </div>
+    <input type="file" id="resultFileInput" accept="application/json" style="display:none" />
+    <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" />
+
+    <div class="toolbar" style="margin-top:12px;">
+      <div class="field">
+        <label for="targetTime">Target Time</label>
+        <input id="targetTime" value="45.0" />
+      </div>
+      <div class="field">
+        <label for="branchFilter">Branch Filter</label>
+        <select id="branchFilter">
+          <option value="ALL">ALL</option>
+          <option value="HF">HF only</option>
+          <option value="LF">LF only</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="confidenceFilter">Confidence Filter</label>
+        <select id="confidenceFilter">
+          <option value="ALL">ALL</option>
+          <option value="HIGH">HIGH only</option>
+          <option value="LOW_A">LOW_A only</option>
+          <option value="LOW_B">LOW_B only</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sortMode">Sort Mode</label>
+        <select id="sortMode">
+          <option value="rank">rank desc</option>
+          <option value="time">time asc</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toggleRow">
+      <label class="toggleChip"><input type="checkbox" id="toggleHF" checked /> show HF</label>
+      <label class="toggleChip"><input type="checkbox" id="toggleLF" checked /> show LF</label>
+      <label class="toggleChip"><input type="checkbox" id="toggleCoarse" checked /> show coarse</label>
+      <label class="toggleChip"><input type="checkbox" id="toggleZoom" checked /> show zoom</label>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="sectionTitle">Quick Audit Inputs</div>
+      <div class="triple">
+        <div class="field">
+          <label for="quickSr">Sample Rate</label>
+          <input id="quickSr" value="1000" />
+        </div>
+        <div class="field">
+          <label for="quickWindowMs">Window (ms)</label>
+          <input id="quickWindowMs" value="500" />
+        </div>
+        <div class="field">
+          <label for="quickHopMs">Hop (ms)</label>
+          <input id="quickHopMs" value="100" />
+        </div>
+      </div>
+      <div class="triple" style="margin-top:12px;">
+        <div class="field">
+          <label for="quickMinSnr">Min SNR</label>
+          <input id="quickMinSnr" value="3.0" />
+        </div>
+        <div class="field">
+          <label for="quickMinIrr">Min Irreversibility</label>
+          <input id="quickMinIrr" value="0.55" />
+        </div>
+        <div class="field">
+          <label for="quickMergeGap">Merge Gap (sec)</label>
+          <input id="quickMergeGap" value="0.5" />
+        </div>
+      </div>
+      <div class="small" style="margin-top:10px;">Raw CSV format: <code>t,ch1,ch2,ch3,ch4,ref1,ref2</code>. More local/ref columns also work if the names begin with <code>ch</code> and <code>ref</code>.</div>
+    </div>
+    <div class="card">
+      <div class="sectionTitle">Synthetic Generator</div>
+      <div class="triple">
+        <label class="toggleChip"><input type="checkbox" id="synTarget" checked /> inject target-like event</label>
+        <label class="toggleChip"><input type="checkbox" id="synSym" checked /> inject symmetric artifact</label>
+        <label class="toggleChip"><input type="checkbox" id="syn50" checked /> inject 50Hz artifact</label>
+      </div>
+      <div class="triple" style="margin-top:12px;">
+        <label class="toggleChip"><input type="checkbox" id="synDrift" checked /> add drift</label>
+        <label class="toggleChip"><input type="checkbox" id="synHum" checked /> add hum</label>
+        <label class="toggleChip"><input type="checkbox" id="synNoise" checked /> add noise</label>
+      </div>
+      <div class="small" style="margin-top:10px;">This generator makes browser-only multichannel data, then runs the same quick pipeline used by raw CSV mode.</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="sectionTitle">Classification Integrity</div>
+      <div class="warnBox" id="classificationWarning">No data loaded.</div>
+    </div>
+    <div class="card">
+      <div class="sectionTitle">Classification Debug</div>
+      <div class="summaryText" id="debugSummary">No data loaded.</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="sectionTitle">Timeline</div>
+      <canvas id="timelineChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="sectionTitle">Rank Space</div>
+      <canvas id="rankChart"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="sectionTitle">Waveform Overlay</div>
+      <canvas id="waveChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="sectionTitle">Winner Summary</div>
+      <div class="summaryText" id="winnerSummary">Load a result file, raw CSV, or synthetic demo.</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="sectionTitle">Executive Verdict</div>
+      <div class="box">
+        <div class="verdictMain" id="verdictMain">No data loaded</div>
+        <div class="verdictSub" id="verdictSub">Load a result file, raw CSV, or synthetic demo to compute the audit interpretation.</div>
+      </div>
+      <ul class="interpList" id="interpList"></ul>
+    </div>
+    <div class="card">
+      <div class="sectionTitle">Smart Classification</div>
+      <div class="box"><div class="classTitle">Supporting precursor</div><div class="summaryText" id="supportingBox">No data loaded.</div></div>
+      <div class="box" style="margin-top:10px;"><div class="classTitle">Near-target secondary</div><div class="summaryText" id="secondaryBox">No data loaded.</div></div>
+      <div class="box" style="margin-top:10px;"><div class="classTitle">Environmental noise</div><div class="summaryText" id="environmentBox">No data loaded.</div></div>
+      <div class="box" style="margin-top:10px;"><div class="classTitle">Artifact-like</div><div class="summaryText" id="artifactBox">No data loaded.</div></div>
+      <div class="box" style="margin-top:10px;"><div class="classTitle">Weak alternatives</div><div class="summaryText" id="weakBox">No data loaded.</div></div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <div class="sectionTitle">Candidates</div>
+      <div id="candidateList"></div>
+    </div>
+
+    <div class="card">
+      <div class="sectionTitle">Event Inspector</div>
+      <div id="badgeBox"></div>
+      <div class="inspectorGrid" style="margin-top:10px;">
+        <div class="mini"><div class="miniK">time</div><div class="miniV" id="dTime">-</div></div>
+        <div class="mini"><div class="miniK">rank</div><div class="miniV" id="dRank">-</div></div>
+        <div class="mini"><div class="miniK">hit_w</div><div class="miniV" id="dHit">-</div></div>
+        <div class="mini"><div class="miniK">stage</div><div class="miniV" id="dStage">-</div></div>
+      </div>
+      <div class="metric"><div class="metricHead"><span>P_snr</span><span id="mPsnr">-</span></div><div class="bar"><span id="bPsnr" style="width:0%"></span></div></div>
+      <div class="metric"><div class="metricHead"><span>T_irreversibility</span><span id="mTirr">-</span></div><div class="bar"><span id="bTirr" style="width:0%"></span></div></div>
+      <div class="metric"><div class="metricHead"><span>Entropy</span><span id="mEnt">-</span></div><div class="bar"><span id="bEnt" style="width:0%"></span></div></div>
+      <div class="metric"><div class="metricHead"><span>Mirror</span><span id="mMirror">-</span></div><div class="bar"><span id="bMirror" style="width:0%"></span></div></div>
+      <div class="metric"><div class="metricHead"><span>50Hz</span><span id="m50">-</span></div><div class="bar"><span id="b50" style="width:0%"></span></div></div>
+    </div>
+
+    <div class="card">
+      <div class="sectionTitle">Raw Metric Table</div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>Metric</th><th>Value</th><th>Comment</th></tr></thead>
+          <tbody id="metricTableBody"></tbody>
+        </table>
+      </div>
+      <div class="sectionTitle" style="margin-top:16px;">Raw Event JSON</div>
+      <div class="rawWrap"><textarea class="mono" id="rawJson"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const EPS = 1e-12;
+  let data = null;
+  let selected = null;
+  let rawSeries = null;
+  let timelineChart = null;
+  let rankChart = null;
+  let waveChart = null;
+
+  const metricComment = {
+    P_snr: v => v >= 8 ? 'strong local contrast' : (v >= 4 ? 'moderate local contrast' : 'weak local contrast'),
+    T_irreversibility: v => v >= 2 ? 'strong transition-like asymmetry' : (v >= 0.8 ? 'some asymmetry' : 'weak asymmetry'),
+    S_entropy: v => v <= 0.4 ? 'compact / structured' : (v <= 0.7 ? 'borderline spread' : 'very diffuse'),
+    Ratio_50Hz: v => v <= 0.05 ? 'low mains contamination' : (v <= 0.15 ? 'some mains contamination' : 'strong mains contamination'),
+    Ratio_MirrorSym: v => v <= 0.65 ? 'not strongly symmetric' : (v <= 0.85 ? 'moderately symmetric' : 'artifact-like symmetry')
+  };
+
+  const demoData = {
+    config: { sr: 1000, window_ms: 500, coarse_hop_ms: 100, fine_hop_ms: 25, target_time_sec: 45.0, zoom_margin_sec: 1.0 },
+    coarse_timeline: Array.from({ length: 60 }, (_, i) => ({ t: i, hf: Math.max(0, 2 + Math.sin(i / 5) * 1.2 + (i > 43 && i < 47 ? 8 : 0) + (i === 3 ? 5 : 0)), lf: Math.max(0, 1 + Math.cos(i / 7) * 0.8 + (i > 40 && i < 58 ? 3 : 0)) })),
+    coarse: [
+      { id:'EVT-demo-coarse-44900-000', branch:'HF', stage:'coarse', confidence:'HIGH', time_sec:44.9, start_sec:44.6, end_sec:45.0, hit_windows:5, rank_score:15.69, waveform:Array.from({length:160}, (_,i)=>({x:i,y:Math.sin(i/10)*0.2+Math.exp(-Math.pow((i-100)/14,2))*1.3})), metrics:{P_snr:9.7,R_coherence:0.98,T_irreversibility:2.95,S_entropy:0.37,Ratio_50Hz:0.0,Ratio_Sym:0.53,Ratio_Edge:0.30,Ratio_MirrorSym:0.64} },
+      { id:'EVT-demo-coarse-02800-000', branch:'HF', stage:'coarse', confidence:'LOW_B1_SYMMETRIC_ARTIFACT', time_sec:2.8, start_sec:2.7, end_sec:2.9, hit_windows:1, rank_score:9.58, waveform:Array.from({length:160}, (_,i)=>({x:i,y:Math.exp(-Math.pow((i-80)/14,2))*1.2})), metrics:{P_snr:10.11,R_coherence:0.79,T_irreversibility:0.62,S_entropy:0.55,Ratio_50Hz:0.05,Ratio_Sym:1.0,Ratio_Edge:0.05,Ratio_MirrorSym:1.0} },
+      { id:'EVT-demo-coarse-LF-41300-000', branch:'LF', stage:'coarse', confidence:'LOW_B4_LONG_DRIFT_ARTIFACT', time_sec:41.3, start_sec:40.9, end_sec:59.1, hit_windows:595, rank_score:220.96, waveform:Array.from({length:160}, (_,i)=>({x:i,y:Math.sin(i/20)*0.35+i*0.003})), metrics:{P_snr:12.46,R_coherence:0.91,T_irreversibility:1.2,S_entropy:0.2,Ratio_50Hz:0.0,Ratio_Sym:1.0,Ratio_Edge:0.28,Ratio_MirrorSym:1.0} }
+    ],
+    zoom: [
+      { id:'EVT-demo-zoom-44950-000', branch:'HF', stage:'zoom', confidence:'HIGH', time_sec:44.95, start_sec:44.7, end_sec:45.0, hit_windows:22, rank_score:22.40, waveform:Array.from({length:180}, (_,i)=>({x:i,y:Math.sin(i/12)*0.18+Math.exp(-Math.pow((i-110)/13,2))*1.7})), metrics:{P_snr:9.72,R_coherence:0.99,T_irreversibility:2.83,S_entropy:0.37,Ratio_50Hz:0.0,Ratio_Sym:0.49,Ratio_Edge:0.43,Ratio_MirrorSym:0.63} },
+      { id:'EVT-demo-zoom-44825-000', branch:'HF', stage:'zoom', confidence:'LOW_A_CANDIDATE', time_sec:44.825, start_sec:44.6, end_sec:45.05, hit_windows:10, rank_score:9.19, waveform:Array.from({length:180}, (_,i)=>({x:i,y:Math.sin(i/11)*0.10+Math.exp(-Math.pow((i-95)/16,2))*1.0})), metrics:{P_snr:3.81,R_coherence:0.91,T_irreversibility:0.60,S_entropy:0.63,Ratio_50Hz:0.09,Ratio_Sym:0.78,Ratio_Edge:0.07,Ratio_MirrorSym:0.61} }
+    ]
+  };
+
+  function safeArray(v){ return Array.isArray(v) ? v : []; }
+  function q(id){ return document.getElementById(id); }
+  function num(v, d=0){ const n = Number(v); return Number.isFinite(n) ? n : d; }
+
+  function normalizeData(input){
+    const out = structuredClone(input || {});
+    out.coarse = safeArray(out.coarse);
+    out.zoom = safeArray(out.zoom);
+    out.coarse_timeline = safeArray(out.coarse_timeline);
+    if (!out.coarse_timeline.length) out.coarse_timeline = demoData.coarse_timeline;
+    return out;
+  }
+
+  function allRawEvents(){ return !data ? [] : [...safeArray(data.zoom), ...safeArray(data.coarse)]; }
+
+  function allEvents(){
+    let events = allRawEvents();
+    const showHF = q('toggleHF').checked;
+    const showLF = q('toggleLF').checked;
+    const showCoarse = q('toggleCoarse').checked;
+    const showZoom = q('toggleZoom').checked;
+    const branchFilter = q('branchFilter').value;
+    const confidenceFilter = q('confidenceFilter').value;
+    const sortMode = q('sortMode').value;
+
+    events = events.filter(e => {
+      if (!showHF && e.branch === 'HF') return false;
+      if (!showLF && e.branch === 'LF') return false;
+      if (!showCoarse && e.stage === 'coarse') return false;
+      if (!showZoom && e.stage === 'zoom') return false;
+      if (branchFilter !== 'ALL' && e.branch !== branchFilter) return false;
+      if (confidenceFilter !== 'ALL' && !String(e.confidence || '').includes(confidenceFilter)) return false;
+      return true;
+    });
+
+    if (sortMode === 'time') events.sort((a,b)=> (a.time_sec||0) - (b.time_sec||0));
+    else events.sort((a,b)=> (b.rank_score||0) - (a.rank_score||0));
+    return events;
+  }
+
+  function bestEvent(){
+    const hf = allRawEvents().filter(e => e.branch === 'HF').sort((a,b)=> (b.rank_score||0) - (a.rank_score||0));
+    return hf[0] || allRawEvents().sort((a,b)=> (b.rank_score||0) - (a.rank_score||0))[0] || null;
+  }
+
+  function selectedEvent(){
+    const events = allEvents();
+    if (!events.length) return null;
+    if (!selected) return events[0];
+    return events.find(e => e.id === selected.id) || events[0];
+  }
+
+  function confClass(conf){
+    if (String(conf).includes('HIGH')) return 'badge high';
+    if (String(conf).includes('LOW_A')) return 'badge low';
+    return 'badge bad';
+  }
+  function branchClass(branch){ return branch === 'HF' ? 'badge hf' : 'badge lf'; }
+
+  function setBar(id, value, max){ q(id).style.width = `${Math.max(0, Math.min(100, (num(value)/max)*100))}%`; }
+
+  function classifyEvents(){
+    const best = bestEvent();
+    const target = num(q('targetTime').value, 45);
+    const out = { winner: best, supporting: [], secondary: [], environmental: [], artifact: [], weak: [] };
+
+    for (const ev of allRawEvents()) {
+      if (best && ev.id === best.id) continue;
+      const nearTarget = Math.abs((ev.time_sec || 0) - target) <= 1.0;
+      const conf = String(ev.confidence || '');
+      const m = ev.metrics || {};
+      const mirror = num(m.Ratio_MirrorSym, 0);
+
+      if (ev.branch === 'LF') out.environmental.push(ev);
+      else if (conf.includes('LOW_B') || mirror >= 0.85) out.artifact.push(ev);
+      else if (best && ev.branch === 'HF' && conf.includes('HIGH') && ev.stage === 'coarse' && nearTarget && (ev.hit_windows || 0) >= 3) out.supporting.push(ev);
+      else if (ev.branch === 'HF' && nearTarget && (ev.hit_windows || 0) >= 3) out.secondary.push(ev);
+      else out.weak.push(ev);
+    }
+
+    for (const k of ['supporting','secondary','environmental','artifact','weak']) out[k].sort((a,b)=> (b.rank_score||0) - (a.rank_score||0));
+    return out;
+  }
+
+  function classificationIntegrity(){
+    const cls = classifyEvents();
+    const total = allRawEvents().length;
+    const expected = total - (cls.winner ? 1 : 0);
+    const actual = cls.supporting.length + cls.secondary.length + cls.environmental.length + cls.artifact.length + cls.weak.length;
+    const missing = [];
+    const duplicates = [];
+    const seen = new Map();
+    for (const ev of [...cls.supporting, ...cls.secondary, ...cls.environmental, ...cls.artifact, ...cls.weak]) seen.set(ev.id, (seen.get(ev.id) || 0) + 1);
+    for (const ev of allRawEvents()) {
+      if (cls.winner && ev.id === cls.winner.id) continue;
+      if (!seen.has(ev.id)) missing.push(ev.id);
+    }
+    for (const [id, count] of seen.entries()) if (count > 1) duplicates.push(`${id} x${count}`);
+    return { ok: actual === expected && missing.length === 0 && duplicates.length === 0, expected, actual, missing, duplicates, cls };
+  }
+
+  function renderClassificationWarning(){
+    const info = classificationIntegrity();
+    const box = q('classificationWarning');
+    box.className = info.ok ? 'warnBox okBox' : 'warnBox';
+    if (!allRawEvents().length) { box.textContent = 'No data loaded.'; return; }
+    box.textContent = info.ok
+      ? `OK: all non-winner events classified exactly once. expected=${info.expected}, actual=${info.actual}`
+      : `Classification mismatch detected\nexpected=${info.expected}\nactual=${info.actual}\nmissing=${info.missing.join(', ') || 'none'}\nduplicates=${info.duplicates.join(', ') || 'none'}`;
+  }
+
+  function renderDebugSummary(){
+    const info = classificationIntegrity();
+    const rawIds = allRawEvents().map(e => e.id);
+    const cls = info.cls;
+    const lines = [];
+    lines.push(`raw IDs (${rawIds.length}): ${rawIds.join(', ') || 'none'}`);
+    lines.push(`winner: ${cls.winner ? cls.winner.id : 'none'}`);
+    lines.push(`supporting (${cls.supporting.length}): ${cls.supporting.map(e=>e.id).join(', ') || 'none'}`);
+    lines.push(`secondary (${cls.secondary.length}): ${cls.secondary.map(e=>e.id).join(', ') || 'none'}`);
+    lines.push(`environmental (${cls.environmental.length}): ${cls.environmental.map(e=>e.id).join(', ') || 'none'}`);
+    lines.push(`artifact (${cls.artifact.length}): ${cls.artifact.map(e=>e.id).join(', ') || 'none'}`);
+    lines.push(`weak (${cls.weak.length}): ${cls.weak.map(e=>e.id).join(', ') || 'none'}`);
+    lines.push(`missing: ${info.missing.join(', ') || 'none'}`);
+    lines.push(`duplicates: ${info.duplicates.join(', ') || 'none'}`);
+    q('debugSummary').textContent = lines.join('\n');
+  }
+
+  function renderCandidates(){
+    const box = q('candidateList');
+    box.innerHTML = '';
+    const events = allEvents();
+    if (!events.length) { box.innerHTML = '<div class="small">No events under current filters.</div>'; return; }
+    events.forEach((e, idx) => {
+      const btn = document.createElement('button');
+      const current = selectedEvent();
+      btn.className = 'candidate' + (current && current.id === e.id ? ' active' : '');
+      btn.onclick = () => { selected = e; renderAll(); };
+      btn.innerHTML = `
+        <div class="small">Rank #${idx+1}</div>
+        <div class="candidateTitle">${e.id}</div>
+        <div class="small">t=${e.time_sec} / stage=${e.stage}</div>
+        <div>
+          <span class="${branchClass(e.branch)}">${e.branch}</span>
+          <span class="${confClass(e.confidence)}">${e.confidence}</span>
+          <span class="badge">rank ${e.rank_score.toFixed ? e.rank_score.toFixed(2) : e.rank_score}</span>
+          <span class="badge">hit_w ${e.hit_windows}</span>
+        </div>`;
+      box.appendChild(btn);
+    });
+  }
+
+  function updateStats(){
+    const all = allRawEvents();
+    q('statTotal').textContent = all.length;
+    q('statHigh').textContent = all.filter(e => String(e.confidence||'').includes('HIGH')).length;
+    q('statHF').textContent = all.filter(e => e.branch === 'HF').length;
+    q('statLF').textContent = all.filter(e => e.branch === 'LF').length;
+  }
+
+  function buildInterpretation(ev){
+    if (!ev) return { main:'No data loaded', sub:'Load a result file, raw CSV, or synthetic demo to compute the final audit interpretation.', bullets:[] };
+    const m = ev.metrics || {};
+    const targetTime = num(q('targetTime').value, 45);
+    const nearTarget = Math.abs((ev.time_sec||0) - targetTime) <= 1.0;
+    const bullets = [];
+    bullets.push(ev.branch === 'HF' ? 'HF branch: this belongs to the target-search side.' : 'LF branch: this is environmental structure first, not a primary target by default.');
+    bullets.push(String(ev.confidence||'').includes('HIGH') ? 'Confidence label is HIGH under the current rules.' : `Confidence label is ${ev.confidence}.`);
+    if ((ev.hit_windows||0) >= 10) bullets.push(`hit_windows = ${ev.hit_windows}, which supports persistence.`);
+    else if ((ev.hit_windows||0) >= 3) bullets.push(`hit_windows = ${ev.hit_windows}, which is usable but not deeply sustained.`);
+    else bullets.push(`hit_windows = ${ev.hit_windows}, which is weak and closer to singleton behavior.`);
+    bullets.push(`P_snr = ${num(m.P_snr).toFixed(2)} (${metricComment.P_snr(num(m.P_snr))}).`);
+    bullets.push(`T_irreversibility = ${num(m.T_irreversibility).toFixed(2)} (${metricComment.T_irreversibility(num(m.T_irreversibility))}).`);
+    bullets.push(`Ratio_50Hz = ${num(m.Ratio_50Hz).toFixed(3)} (${metricComment.Ratio_50Hz(num(m.Ratio_50Hz))}).`);
+    bullets.push(`Ratio_MirrorSym = ${num(m.Ratio_MirrorSym).toFixed(3)} (${metricComment.Ratio_MirrorSym(num(m.Ratio_MirrorSym))}).`);
+    bullets.push(nearTarget ? `time_sec = ${ev.time_sec}, which is near the target time ${targetTime}.` : `time_sec = ${ev.time_sec}, which is away from the target time ${targetTime}.`);
+    let main = 'BORDERLINE CANDIDATE';
+    let sub = 'The event is visible, but the evidence is mixed.';
+    if (ev.branch === 'HF' && String(ev.confidence||'').includes('HIGH') && nearTarget && (ev.hit_windows||0) >= 5) {
+      main = 'CURRENT BEST: TARGET-LIKE';
+      sub = 'HF branch, near target time, sustained windows, and acceptable artifact profile.';
+    } else if (ev.branch === 'LF') {
+      main = 'ENVIRONMENT-LIKE / NOISE-MAP EVENT';
+      sub = 'This event is more useful as environmental context than as the primary target.';
+    } else if ((ev.hit_windows||0) <= 2) {
+      main = 'WEAK / SINGLETON-LIKE';
+      sub = 'The event exists, but persistence is weak and still artifact-suspect.';
+    }
+    return { main, sub, bullets };
+  }
+
+  function renderVerdict(){
+    const best = bestEvent();
+    const v = buildInterpretation(best);
+    q('verdictMain').textContent = v.main;
+    q('verdictSub').textContent = v.sub;
+    const list = q('interpList');
+    list.innerHTML = '';
+    v.bullets.forEach(x => { const li = document.createElement('li'); li.textContent = x; list.appendChild(li); });
+  }
+
+  function renderWinnerSummary(){
+    const best = bestEvent();
+    if (!best) { q('winnerSummary').textContent = 'No data loaded.'; return; }
+    const cls = classifyEvents();
+    const lines = [];
+    lines.push(`Winner: ${best.id}`);
+    lines.push(buildInterpretation(best).sub);
+    buildInterpretation(best).bullets.forEach(x => lines.push(`- ${x}`));
+    lines.push('');
+    lines.push('Supporting precursor:');
+    lines.push(cls.supporting.length ? cls.supporting.map(e => `- ${e.id}`).join('\n') : '- none');
+    lines.push('Near-target secondary:');
+    lines.push(cls.secondary.length ? cls.secondary.map(e => `- ${e.id}`).join('\n') : '- none');
+    lines.push('Environmental noise:');
+    lines.push(cls.environmental.length ? cls.environmental.map(e => `- ${e.id}`).join('\n') : '- none');
+    lines.push('Artifact-like:');
+    lines.push(cls.artifact.length ? cls.artifact.map(e => `- ${e.id}`).join('\n') : '- none');
+    lines.push('Weak alternatives:');
+    lines.push(cls.weak.length ? cls.weak.map(e => `- ${e.id}`).join('\n') : '- none');
+    q('winnerSummary').textContent = lines.join('\n');
+  }
+
+  function renderClassifications(){
+    const cls = classifyEvents();
+    const formatList = arr => arr.length ? arr.map(e => `- ${e.id}`).join('\n') : '- none';
+    q('supportingBox').textContent = formatList(cls.supporting);
+    q('secondaryBox').textContent = formatList(cls.secondary);
+    q('environmentBox').textContent = formatList(cls.environmental);
+    q('artifactBox').textContent = formatList(cls.artifact);
+    q('weakBox').textContent = formatList(cls.weak);
+  }
+
+  function renderMetricTable(ev){
+    const body = q('metricTableBody');
+    body.innerHTML = '';
+    if (!ev) { body.innerHTML = '<tr><td colspan="3">No event selected</td></tr>'; return; }
+    const m = ev.metrics || {};
+    const rows = [
+      ['P_snr', num(m.P_snr), metricComment.P_snr(num(m.P_snr))],
+      ['R_coherence', num(m.R_coherence), num(m.R_coherence) >= 0.9 ? 'high inter-channel agreement' : (num(m.R_coherence) >= 0.6 ? 'moderate agreement' : 'weak agreement')],
+      ['T_irreversibility', num(m.T_irreversibility), metricComment.T_irreversibility(num(m.T_irreversibility))],
+      ['S_entropy', num(m.S_entropy), metricComment.S_entropy(num(m.S_entropy))],
+      ['Ratio_50Hz', num(m.Ratio_50Hz), metricComment.Ratio_50Hz(num(m.Ratio_50Hz))],
+      ['Ratio_Sym', num(m.Ratio_Sym), num(m.Ratio_Sym) >= 0.85 ? 'strong symmetry' : (num(m.Ratio_Sym) >= 0.6 ? 'moderate symmetry' : 'weak symmetry')],
+      ['Ratio_Edge', num(m.Ratio_Edge), num(m.Ratio_Edge) <= 0.2 ? 'centered in window' : (num(m.Ratio_Edge) <= 0.5 ? 'some edge bias' : 'strong edge bias')],
+      ['Ratio_MirrorSym', num(m.Ratio_MirrorSym), metricComment.Ratio_MirrorSym(num(m.Ratio_MirrorSym))]
+    ];
+    rows.forEach(([k,v,c]) => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${k}</td><td>${Number(v).toFixed(4)}</td><td>${c}</td>`; body.appendChild(tr); });
+  }
+
+  function renderDetail(){
+    const ev = selectedEvent();
+    q('badgeBox').innerHTML = '';
+    if (!ev) {
+      q('dTime').textContent = '-'; q('dRank').textContent = '-'; q('dHit').textContent = '-'; q('dStage').textContent = '-'; q('rawJson').value = ''; renderMetricTable(null); return;
+    }
+    const m = ev.metrics || {};
+    q('dTime').textContent = ev.time_sec;
+    q('dRank').textContent = (ev.rank_score || 0).toFixed ? ev.rank_score.toFixed(2) : ev.rank_score;
+    q('dHit').textContent = ev.hit_windows;
+    q('dStage').textContent = ev.stage;
+    q('mPsnr').textContent = num(m.P_snr).toFixed(3);
+    q('mTirr').textContent = num(m.T_irreversibility).toFixed(3);
+    q('mEnt').textContent = num(m.S_entropy).toFixed(3);
+    q('mMirror').textContent = num(m.Ratio_MirrorSym).toFixed(3);
+    q('m50').textContent = num(m.Ratio_50Hz).toFixed(3);
+    setBar('bPsnr', m.P_snr, 12); setBar('bTirr', m.T_irreversibility, 4); setBar('bEnt', m.S_entropy, 1); setBar('bMirror', m.Ratio_MirrorSym, 1); setBar('b50', m.Ratio_50Hz, 0.3);
+    q('badgeBox').innerHTML = `<span class="${branchClass(ev.branch)}">${ev.branch}</span><span class="${confClass(ev.confidence)}">${ev.confidence}</span><span class="badge">${ev.stage}</span>`;
+    q('rawJson').value = JSON.stringify(ev, null, 2);
+    renderMetricTable(ev);
+  }
+
+  function drawTimeline(){
+    if (timelineChart) timelineChart.destroy();
+    const labels = safeArray(data?.coarse_timeline).map(d => d.t);
+    const datasets = [];
+    if (q('toggleHF').checked) datasets.push({ label: 'HF', data: safeArray(data?.coarse_timeline).map(d=>d.hf), borderColor: '#67e8f9', backgroundColor:'transparent', pointRadius:0, borderWidth:2.3, tension:.24 });
+    if (q('toggleLF').checked) datasets.push({ label: 'LF', data: safeArray(data?.coarse_timeline).map(d=>d.lf), borderColor: '#fbbf24', backgroundColor:'transparent', pointRadius:0, borderWidth:2.0, tension:.24 });
+    const target = num(q('targetTime').value, 45);
+    const best = bestEvent();
+    timelineChart = new Chart(q('timelineChart'), {
+      type: 'line',
+      data: { labels, datasets },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks:{color:'#a1a1aa'}, grid:{color:'#27272a'} }, y: { ticks:{color:'#a1a1aa'}, grid:{color:'#27272a'} } }, plugins: { legend: { labels:{color:'#e4e4e7'} }, tooltip: { backgroundColor:'#09090b', borderColor:'#27272a', borderWidth:1, titleColor:'#fafafa', bodyColor:'#e4e4e7' } } },
+      plugins: [{ id:'timelineMarkers', afterDraw(chart){ const {ctx, chartArea:{top,bottom}, scales:{x}} = chart; const targetX = x.getPixelForValue(target); ctx.save(); ctx.setLineDash([6,6]); ctx.strokeStyle='#ffffff'; ctx.beginPath(); ctx.moveTo(targetX, top); ctx.lineTo(targetX, bottom); ctx.stroke(); ctx.restore(); if (best) { const px = x.getPixelForValue(best.time_sec); ctx.save(); ctx.strokeStyle='#67e8f9'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, bottom); ctx.stroke(); ctx.restore(); } } }]
+    });
+  }
+
+  function drawRank(){
+    if (rankChart) rankChart.destroy();
+    const target = num(q('targetTime').value, 45);
+    const events = allEvents();
+    rankChart = new Chart(q('rankChart'), {
+      type: 'scatter',
+      data: { datasets: [{ label:'events', data: events.map(e=>({x:e.time_sec,y:e.rank_score})), backgroundColor: events.map(e=>e.branch==='HF' ? '#67e8f9' : '#fbbf24'), pointRadius: events.map(e=> bestEvent() && e.id===bestEvent().id ? 8 : 5) }] },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks:{color:'#a1a1aa'}, grid:{color:'#27272a'}, title:{display:true,text:'time (sec)',color:'#a1a1aa'} }, y: { ticks:{color:'#a1a1aa'}, grid:{color:'#27272a'}, title:{display:true,text:'rank',color:'#a1a1aa'} } }, plugins: { legend:{labels:{color:'#e4e4e7'}}, tooltip:{ backgroundColor:'#09090b', borderColor:'#27272a', borderWidth:1, titleColor:'#fafafa', bodyColor:'#e4e4e7' } } },
+      plugins: [{ id:'rankTarget', afterDraw(chart){ const {ctx, chartArea:{top,bottom}, scales:{x}} = chart; const xPos = x.getPixelForValue(target); ctx.save(); ctx.setLineDash([6,6]); ctx.strokeStyle='#ffffff'; ctx.beginPath(); ctx.moveTo(xPos, top); ctx.lineTo(xPos, bottom); ctx.stroke(); ctx.restore(); } }]
+    });
+  }
+
+  function syntheticWave(ev){
+    const arr = [];
+    for (let i=0;i<180;i++) {
+      const pulse = Math.exp(-Math.pow((i-100)/15,2)) * (ev.branch === 'HF' ? 1.5 : 0.8);
+      const base = Math.sin(i/12) * (ev.branch === 'HF' ? 0.12 : 0.22);
+      arr.push({x:i, y: base + pulse});
+    }
+    return arr;
+  }
+
+  function drawWave(){
+    if (waveChart) waveChart.destroy();
+    const best = bestEvent();
+    const current = selectedEvent();
+    const chosen = [current, best].filter(Boolean).filter((v,i,a)=> a.findIndex(x=>x.id===v.id)===i);
+    const datasets = chosen.map((ev, idx) => {
+      const wave = Array.isArray(ev.waveform) && ev.waveform.length ? ev.waveform : syntheticWave(ev);
+      return { label: ev.id, data: wave.map(p=>({x:p.x,y:p.y})), parsing:false, borderColor: idx===0 ? '#67e8f9' : '#c084fc', backgroundColor:'transparent', pointRadius:0, borderWidth:2, tension:.18 };
+    });
+    waveChart = new Chart(q('waveChart'), {
+      type: 'line',
+      data: { datasets },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { type:'linear', ticks:{color:'#a1a1aa'}, grid:{color:'#27272a'} }, y: { ticks:{color:'#a1a1aa'}, grid:{color:'#27272a'} } }, plugins: { legend:{labels:{color:'#e4e4e7'}}, tooltip:{ backgroundColor:'#09090b', borderColor:'#27272a', borderWidth:1, titleColor:'#fafafa', bodyColor:'#e4e4e7' } } }
+    });
+  }
+
+  function buildSummaryText(){ return q('winnerSummary').textContent || 'No data loaded.'; }
+
+  async function copyText(text){ try { await navigator.clipboard.writeText(text); alert('Copied.'); } catch { alert('Copy failed.'); } }
+  function downloadText(filename, text, mime){ const blob = new Blob([text], { type: mime }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+  function exportCsv(){
+    const rows = [];
+    rows.push(['id','branch','stage','confidence','time_sec','start_sec','end_sec','hit_windows','rank_score','P_snr','R_coherence','T_irreversibility','S_entropy','Ratio_50Hz','Ratio_Sym','Ratio_Edge','Ratio_MirrorSym']);
+    allRawEvents().forEach(e => { const m = e.metrics || {}; rows.push([e.id,e.branch,e.stage,e.confidence,e.time_sec,e.start_sec,e.end_sec,e.hit_windows,e.rank_score,m.P_snr??'',m.R_coherence??'',m.T_irreversibility??'',m.S_entropy??'',m.Ratio_50Hz??'',m.Ratio_Sym??'',m.Ratio_Edge??'',m.Ratio_MirrorSym??'']); });
+    const csv = rows.map(r => r.map(v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; }).join(',')).join('\n');
+    downloadText('non_equilibrium_event_auditor_events.csv', csv, 'text/csv;charset=utf-8');
+  }
+
+  // =========================
+  // Quick Audit Engine
+  // =========================
+  function mean(arr){ return arr.reduce((a,b)=>a+b,0) / (arr.length || 1); }
+  function std(arr){ const m = mean(arr); return Math.sqrt(mean(arr.map(v => (v-m)*(v-m))) + EPS); }
+  function rms(arr){ return Math.sqrt(mean(arr.map(v => v*v)) + EPS); }
+
+  function getWindow(data, start, win){ return data.slice(start, start + win); }
+
+  function meanCenterChannels(window){
+    const n = window.length;
+    const chs = window[0]?.length || 0;
+    const means = Array(chs).fill(0);
+    for (let i=0;i<n;i++) for (let c=0;c<chs;c++) means[c] += window[i][c];
+    for (let c=0;c<chs;c++) means[c] /= Math.max(1, n);
+    return window.map(row => row.map((v,c)=>v-means[c]));
+  }
+
+  function transpose2d(x){ return x[0].map((_, c) => x.map(r => r[c])); }
+
+  function dftPower(series, sr){
+    const N = series.length;
+    const out = [];
+    const half = Math.floor(N/2);
+    for (let k=0;k<=half;k++) {
+      let re = 0, im = 0;
+      for (let n=0;n<N;n++) {
+        const angle = -2 * Math.PI * k * n / N;
+        re += series[n] * Math.cos(angle);
+        im += series[n] * Math.sin(angle);
+      }
+      const freq = k * sr / N;
+      out.push({ f: freq, p: re*re + im*im });
+    }
+    return out;
+  }
+
+  function estimateMetrics(localWin, refWin, sr){
+    const lc = meanCenterChannels(localWin);
+    const rc = meanCenterChannels(refWin);
+    const localCh = transpose2d(lc);
+    const refCh = transpose2d(rc);
+    const localRms = mean(localCh.map(ch => rms(ch)));
+    const refRms = mean(refCh.map(ch => rms(ch)));
+    const P_snr = 10 * Math.log10(localRms + EPS) - 10 * Math.log10(refRms + EPS);
+
+    // quick coherence
+    const zlocal = localCh.map(ch => {
+      const m = mean(ch), s = std(ch);
+      return ch.map(v => (v-m)/(s+EPS));
+    });
+    let pairVals = [];
+    for (let i=0;i<zlocal.length;i++) {
+      for (let j=i+1;j<zlocal.length;j++) {
+        let dot = 0;
+        for (let n=0;n<zlocal[i].length;n++) dot += zlocal[i][n] * zlocal[j][n];
+        pairVals.push(Math.abs(dot / zlocal[i].length));
+      }
+    }
+    const R_coherence = pairVals.length ? mean(pairVals) : 0;
+
+    // irreversibility via cubic skew of diff
+    const irrVals = localCh.map(ch => {
+      const d = [];
+      for (let i=1;i<ch.length;i++) d.push(ch[i]-ch[i-1]);
+      const d2 = mean(d.map(v=>v*v));
+      const d3 = mean(d.map(v=>v*v*v));
+      return Math.abs(d3 / (Math.pow(d2, 1.5) + EPS));
+    });
+    const T_irreversibility = Math.max(...irrVals, 0);
+
+    // entropy rough spectral entropy
+    const entVals = localCh.map(ch => {
+      const spec = dftPower(ch, sr).map(x=>x.p);
+      const sumP = spec.reduce((a,b)=>a+b,0) + EPS;
+      const p = spec.map(v=>v/sumP).filter(v=>v>EPS);
+      const H = -p.reduce((a,b)=>a + b*Math.log(b), 0);
+      return H / Math.log(spec.length + EPS);
+    });
+    const S_entropy = mean(entVals);
+
+    // 50Hz ratio
+    const p50Vals = localCh.map(ch => {
+      const spec = dftPower(ch, sr);
+      const total = spec.reduce((a,b)=>a+b.p,0) + EPS;
+      const p50 = spec.filter(x => x.f >= 45 && x.f <= 55).reduce((a,b)=>a+b.p,0);
+      return p50 / total;
+    });
+    const Ratio_50Hz = Math.max(...p50Vals, 0);
+
+    // symmetry & mirror from envelope
+    const symVals = [];
+    const mirrorVals = [];
+    const edgeVals = [];
+    for (const ch of localCh) {
+      const env = ch.map(v=>Math.abs(v));
+      let peak = 0;
+      for (let i=1;i<env.length;i++) if (env[i] > env[peak]) peak = i;
+      const r = Math.min(peak, env.length - peak - 1);
+      const centroid = env.reduce((a,v,i)=>a+i*v,0) / (env.reduce((a,b)=>a+b,0)+EPS);
+      edgeVals.push(Math.abs(centroid - env.length/2) / (env.length/2));
+      if (r > 0) {
+        const left = env.slice(peak-r, peak);
+        const right = env.slice(peak+1, peak+1+r);
+        const front = left.reduce((a,b)=>a+b,0);
+        const back = right.reduce((a,b)=>a+b,0);
+        symVals.push(Math.min(front, back) / (Math.max(front, back) + EPS));
+        if (r >= 5) {
+          const rr = right.slice().reverse();
+          let num = 0, den = 0;
+          for (let i=0;i<left.length;i++) { num += Math.abs(left[i]-rr[i]); den += Math.abs(left[i]) + Math.abs(rr[i]); }
+          mirrorVals.push(Math.max(0, Math.min(1, 1 - num/(den+EPS))));
+        } else mirrorVals.push(1.0);
+      } else {
+        symVals.push(1.0);
+        mirrorVals.push(1.0);
+      }
+    }
+
+    return {
+      P_snr, R_coherence, T_irreversibility, S_entropy,
+      Ratio_50Hz,
+      Ratio_Sym: mean(symVals),
+      Ratio_Edge: mean(edgeVals),
+      Ratio_MirrorSym: mean(mirrorVals)
+    };
+  }
+
+  function eventWaveformFromWindow(localWin){
+    const chCount = localWin[0]?.length || 0;
+    if (!chCount) return [];
+    const wave = [];
+    for (let i=0;i<localWin.length;i++) {
+      let v = 0;
+      for (let c=0;c<chCount;c++) v += localWin[i][c];
+      v /= chCount;
+      wave.push({ x: i, y: v });
+    }
+    return wave;
+  }
+
+  function quickRank(metrics, hitW, timeSec, targetTime){
+    let s = metrics.P_snr + 0.4 * hitW + 1.0 * metrics.T_irreversibility - 1.2 * metrics.Ratio_MirrorSym - 1.5 * metrics.Ratio_50Hz - 0.5 * metrics.S_entropy;
+    if (hitW === 1) s -= 5.0;
+    const z = (timeSec - targetTime) / 1.0;
+    s += 2.0 * Math.exp(-0.5 * z*z);
+    return s;
+  }
+
+  function confidenceFromMetrics(m, hitW){
+    if (m.Ratio_50Hz > 0.18) return 'LOW_B2_NARROWBAND_ARTIFACT';
+    if (m.Ratio_MirrorSym > 0.85) return 'LOW_B1_SYMMETRIC_ARTIFACT';
+    const hard = hitW >= 3 && m.P_snr >= 4.5 && m.T_irreversibility >= 0.7 && m.S_entropy <= 0.75 && m.Ratio_50Hz < 0.12 && m.Ratio_MirrorSym < 0.90;
+    return hard ? 'HIGH' : 'LOW_A_CANDIDATE';
+  }
+
+  function clusterHits(hits, sr, mergeGapSec){
+    if (!hits.length) return [];
+    const merged = [];
+    let current = [hits[0]];
+    for (let i=1;i<hits.length;i++) {
+      const dt = (hits[i].idx - current[current.length-1].idx) / sr;
+      if (dt <= mergeGapSec) current.push(hits[i]); else { merged.push(current); current = [hits[i]]; }
+    }
+    merged.push(current);
+    return merged;
+  }
+
+  function buildId(prefix, stage, timeSec, ordinal){
+    const tms = Math.round(timeSec * 1000);
+    return `EVT-${prefix}-${stage}-${String(tms).padStart(5,'0')}-${String(ordinal).padStart(3,'0')}`;
+  }
+
+  function quickAuditFromSeries(series, options={}){
+    const sr = num(options.sr, 1000);
+    const windowMs = num(options.windowMs, 500);
+    const hopMs = num(options.hopMs, 100);
+    const minSnr = num(options.minSnr, 3.0);
+    const minIrr = num(options.minIrr, 0.55);
+    const mergeGap = num(options.mergeGap, 0.5);
+    const targetTime = num(options.targetTime, 45.0);
+
+    const local = series.local;
+    const ref = series.ref;
+    const n = local.length;
+    const win = Math.max(16, Math.floor(windowMs * sr / 1000));
+    const hop = Math.max(1, Math.floor(hopMs * sr / 1000));
+    const coarseHits = [];
+    const timeline = Array.from({length: Math.max(1, Math.ceil(n/sr))}, (_,i)=>({ t:i, hf:0, lf:0 }));
+
+    for (let idx=0; idx+win < n; idx += hop) {
+      const localWin = getWindow(local, idx, win);
+      const refWin = getWindow(ref, idx, win);
+      const m = estimateMetrics(localWin, refWin, sr);
+      const tSec = idx / sr;
+      const secBin = Math.min(timeline.length-1, Math.max(0, Math.round(tSec)));
+      timeline[secBin].hf = Math.max(timeline[secBin].hf, Math.max(0, m.P_snr) + Math.min(8, m.T_irreversibility));
+      if (m.P_snr > minSnr && m.T_irreversibility > minIrr) {
+        coarseHits.push({ idx, tSec, metrics: m, waveform: eventWaveformFromWindow(localWin) });
+      }
+    }
+
+    const coarseClusters = clusterHits(coarseHits, sr, mergeGap);
+    const coarse = coarseClusters.map((cluster, i) => {
+      let rep = cluster[0];
+      for (const c of cluster) if (c.metrics.P_snr > rep.metrics.P_snr) rep = c;
+      const hitW = cluster.length;
+      return {
+        id: buildId('quick', 'coarse', rep.tSec, i),
+        branch: 'HF',
+        stage: 'coarse',
+        confidence: confidenceFromMetrics(rep.metrics, hitW),
+        time_sec: Number(rep.tSec.toFixed(3)),
+        start_sec: Number((cluster[0].idx / sr).toFixed(3)),
+        end_sec: Number((cluster[cluster.length-1].idx / sr).toFixed(3)),
+        hit_windows: hitW,
+        rank_score: quickRank(rep.metrics, hitW, rep.tSec, targetTime),
+        metrics: rep.metrics,
+        waveform: rep.waveform
+      };
+    }).sort((a,b)=>b.rank_score-a.rank_score);
+
+    const zoom = [];
+    const topN = Math.min(3, coarse.length);
+    for (let k=0;k<topN;k++) {
+      const center = coarse[k].time_sec;
+      const start = Math.max(0, Math.floor((center - 1.0) * sr));
+      const end = Math.min(n - win, Math.floor((center + 1.0) * sr));
+      const zoomHits = [];
+      const zoomHop = Math.max(1, Math.floor(25 * sr / 1000));
+      for (let idx=start; idx<end; idx += zoomHop) {
+        const localWin = getWindow(local, idx, win);
+        const refWin = getWindow(ref, idx, win);
+        const m = estimateMetrics(localWin, refWin, sr);
+        const tSec = idx / sr;
+        if (m.P_snr > minSnr && m.T_irreversibility > minIrr) zoomHits.push({ idx, tSec, metrics: m, waveform: eventWaveformFromWindow(localWin) });
+      }
+      const zoomClusters = clusterHits(zoomHits, sr, mergeGap);
+      zoomClusters.forEach((cluster, i) => {
+        let rep = cluster[0];
+        for (const c of cluster) if (c.metrics.P_snr > rep.metrics.P_snr) rep = c;
+        const hitW = cluster.length;
+        zoom.push({
+          id: buildId('quick', 'zoom', rep.tSec, k*100 + i),
+          branch: 'HF',
+          stage: 'zoom',
+          confidence: confidenceFromMetrics(rep.metrics, hitW),
+          time_sec: Number(rep.tSec.toFixed(3)),
+          start_sec: Number((cluster[0].idx / sr).toFixed(3)),
+          end_sec: Number((cluster[cluster.length-1].idx / sr).toFixed(3)),
+          hit_windows: hitW,
+          rank_score: quickRank(rep.metrics, hitW, rep.tSec, targetTime),
+          metrics: rep.metrics,
+          waveform: rep.waveform
+        });
+      });
+    }
+
+    zoom.sort((a,b)=>b.rank_score-a.rank_score);
+    return normalizeData({
+      config: { sr, window_ms: windowMs, coarse_hop_ms: hopMs, fine_hop_ms: 25, target_time_sec: targetTime, zoom_margin_sec: 1.0 },
+      coarse_timeline: timeline,
+      coarse,
+      zoom
+    });
+  }
+
+  function parseCsv(text){
+    const lines = text.trim().split(/\r?\n/).filter(Boolean);
+    if (lines.length < 2) throw new Error('CSV is too short.');
+    const headers = lines[0].split(',').map(s => s.trim());
+    const chIdx = [];
+    const refIdx = [];
+    headers.forEach((h, i) => {
+      const low = h.toLowerCase();
+      if (low.startsWith('ch')) chIdx.push(i);
+      if (low.startsWith('ref')) refIdx.push(i);
+    });
+    if (!chIdx.length || !refIdx.length) throw new Error('CSV needs ch* and ref* columns. Example: t,ch1,ch2,ch3,ch4,ref1,ref2');
+    const local = [];
+    const ref = [];
+    const t = [];
+    for (let li=1; li<lines.length; li++) {
+      const cells = lines[li].split(',').map(s => s.trim());
+      if (cells.length < headers.length) continue;
+      t.push(num(cells[0], li-1));
+      local.push(chIdx.map(i => num(cells[i])));
+      ref.push(refIdx.map(i => num(cells[i])));
+    }
+    return { t, local, ref };
+  }
+
+  function generateSyntheticSeries(){
+    const sr = num(q('quickSr').value, 1000);
+    const duration = 60;
+    const n = sr * duration;
+    const local = Array.from({length:n}, ()=>Array(4).fill(0));
+    const ref = Array.from({length:n}, ()=>Array(2).fill(0));
+
+    function randn(){
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+    }
+
+    for (let i=0;i<n;i++) {
+      const t = i/sr;
+      const drift = q('synDrift').checked ? 0.003 * i + 0.8*Math.sin(t/5) : 0;
+      const hum = q('synHum').checked ? 0.8*Math.sin(2*Math.PI*50*t) : 0;
+      for (let c=0;c<4;c++) local[i][c] = drift + hum + (q('synNoise').checked ? 0.5*randn() : 0);
+      for (let c=0;c<2;c++) ref[i][c] = 0.8*drift + 0.8*hum + (q('synNoise').checked ? 0.35*randn() : 0);
+    }
+
+    if (q('synTarget').checked) {
+      const center = Math.round(num(q('targetTime').value, 45) * sr);
+      const win = Math.floor(0.5 * sr);
+      for (let i=0;i<win && center+i<n;i++) {
+        const tt = i/sr;
+        const pulse = 6.0 * (tt/0.02) * Math.exp(-(tt/0.02));
+        for (let c=0;c<4;c++) local[center+i][c] += pulse * (0.8 + 0.1*c);
+      }
+    }
+
+    if (q('synSym').checked) {
+      const center = Math.round(2.8 * sr);
+      const win = Math.floor(0.5 * sr);
+      for (let i=0;i<win && center+i<n;i++) {
+        const x = -1 + 2*i/Math.max(1, win-1);
+        const shape = 10.0 * Math.exp(-Math.pow(x/0.22, 2));
+        for (let c=0;c<4;c++) local[center+i][c] += shape * (1 + 0.01*c);
+      }
+    }
+
+    if (q('syn50').checked) {
+      const center = Math.round(10.0 * sr);
+      const win = Math.floor(0.5 * sr);
+      for (let i=0;i<win && center+i<n;i++) {
+        const tt = i/sr;
+        const shape = 8.0 * Math.sin(2*Math.PI*50*tt) * (0.5 - 0.5*Math.cos(2*Math.PI*i/Math.max(1, win-1)));
+        for (let c=0;c<4;c++) local[center+i][c] += shape;
+      }
+    }
+
+    return { local, ref };
+  }
+
+  function renderAll(){
+    updateStats();
+    renderClassificationWarning();
+    renderDebugSummary();
+    renderCandidates();
+    renderDetail();
+    renderVerdict();
+    renderWinnerSummary();
+    renderClassifications();
+    drawTimeline();
+    drawRank();
+    drawWave();
+  }
+
+  function loadData(input){
+    data = normalizeData(input);
+    q('targetTime').value = String(data.config?.target_time_sec ?? 45.0);
+    selected = allRawEvents()[0] || null;
+    renderAll();
+  }
+
+  // actions
+  q('loadResultBtn').onclick = () => q('resultFileInput').click();
+  q('loadCsvBtn').onclick = () => q('csvFileInput').click();
+  q('loadDemoBtn').onclick = () => { rawSeries = null; loadData(demoData); };
+  q('runQuickBtn').onclick = () => {
+    if (!rawSeries) { alert('Load raw CSV or generate synthetic first.'); return; }
+    const result = quickAuditFromSeries(rawSeries, {
+      sr: num(q('quickSr').value, 1000),
+      windowMs: num(q('quickWindowMs').value, 500),
+      hopMs: num(q('quickHopMs').value, 100),
+      minSnr: num(q('quickMinSnr').value, 3.0),
+      minIrr: num(q('quickMinIrr').value, 0.55),
+      mergeGap: num(q('quickMergeGap').value, 0.5),
+      targetTime: num(q('targetTime').value, 45.0)
+    });
+    loadData(result);
+  };
+  q('makeSyntheticBtn').onclick = () => {
+    rawSeries = generateSyntheticSeries();
+    const result = quickAuditFromSeries(rawSeries, {
+      sr: num(q('quickSr').value, 1000),
+      windowMs: num(q('quickWindowMs').value, 500),
+      hopMs: num(q('quickHopMs').value, 100),
+      minSnr: num(q('quickMinSnr').value, 3.0),
+      minIrr: num(q('quickMinIrr').value, 0.55),
+      mergeGap: num(q('quickMergeGap').value, 0.5),
+      targetTime: num(q('targetTime').value, 45.0)
+    });
+    loadData(result);
+  };
+  q('copySummaryBtn')?.addEventListener('click', () => copyText(buildSummaryText()));
+  q('copyEventBtn')?.addEventListener('click', () => copyText(q('rawJson').value || ''));
+  q('downloadCsvBtn')?.addEventListener('click', exportCsv);
+
+  q('resultFileInput').onchange = async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const txt = await f.text();
+    rawSeries = null;
+    loadData(JSON.parse(txt));
+  };
+
+  q('csvFileInput').onchange = async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const txt = await f.text();
+    try {
+      rawSeries = parseCsv(txt);
+      q('quickSr').value = q('quickSr').value || '1000';
+      alert('CSV loaded. Now press Run Quick Audit.');
+    } catch (err) {
+      alert(err.message || 'Failed to parse CSV.');
+    }
+  };
+
+  ['targetTime','branchFilter','confidenceFilter','sortMode','toggleHF','toggleLF','toggleCoarse','toggleZoom'].forEach(id => {
+    q(id).addEventListener('change', () => renderAll());
+  });
+
+  loadData(demoData);
+</script>
+</body>
+</html>
