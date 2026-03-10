@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1100" height="800" font-family="Arial" version="1.1" viewBox="0 0 1100 800" xmlns="http://www.w3.org/2000/svg">
+ <style>.box { fill:#0f172a; stroke:#60a5fa; stroke-width:2; rx:8; }
+.text { fill:white; font-size:16px; text-anchor:middle; dominant-baseline:middle; }
+.title { fill:white; font-size:26px; font-weight:bold; }
+.arrow { stroke:#94a3b8; stroke-width:2; marker-end:url(#arrow); }
+.branch { stroke:#22c55e; stroke-width:2; marker-end:url(#arrow); }</style>
+ <defs>
+  <marker id="arrow" markerHeight="10" markerWidth="10" orient="auto" refX="10" refY="3">
+   <path d="m0 0 10 3-10 3z" fill="#94a3b8"/>
+  </marker>
+ </defs>
+ <rect x="1.4211e-14" width="1100" height="800" fill="#333" fill-rule="evenodd" stroke-width="3.6275" style="paint-order:fill markers stroke"/>
+ <text class="title" x="536" y="40">Non-Equilibrium Event Auditor Architecture</text>
+ <!-- Input -->
+ <rect class="box" x="436" y="80" width="200" height="60"/>
+ <text class="text" x="536" y="110">Multichannel Signals</text>
+ <!-- Preprocessing -->
+ <rect class="box" x="436" y="180" width="200" height="60"/>
+ <text class="text" x="536" y="210">DSP Preprocessing</text>
+ <line class="arrow" x1="536" x2="536" y1="140" y2="180"/>
+ <!-- Branch split -->
+ <line class="branch" x1="536" x2="236" y1="240" y2="300"/>
+ <line class="branch" x1="536" x2="836" y1="240" y2="300"/>
+ <!-- LF -->
+ <rect class="box" x="106" y="300" width="260" height="80"/>
+ <text class="text" x="236" y="335">LF Branch</text>
+ <text class="text" x="236" y="360">Environmental Monitoring</text>
+ <!-- HF -->
+ <rect class="box" x="706" y="300" width="260" height="80"/>
+ <text class="text" x="836" y="335">HF Branch</text>
+ <text class="text" x="836" y="360">Transition Extraction</text>
+ <!-- Metrics -->
+ <rect class="box" x="706" y="420" width="260" height="100"/>
+ <text class="text" x="836" y="450">Event Metrics</text>
+ <text class="text" x="836" y="480">P_snr</text>
+ <text class="text" x="836" y="505">T_irreversibility</text>
+ <text class="text" x="836" y="542">hit_windows</text>
+ <line class="arrow" x1="836" x2="836" y1="380" y2="420"/>
+ <!-- Classification -->
+ <rect class="box" x="406" y="540" width="260" height="80"/>
+ <text class="text" x="536" y="575">Event Classification</text>
+ <text class="text" x="536" y="600">HIGH / ARTIFACT / DRIFT</text>
+ <line class="arrow" x1="836" x2="536" y1="520" y2="540"/>
+ <!-- Output -->
+ <rect class="box" x="406" y="650" width="260" height="80"/>
+ <text class="text" x="536" y="685">Audited Event</text>
+ <text class="text" x="536" y="710">Winner / Supporting / Noise</text>
+ <line class="arrow" x1="536" x2="536" y1="620" y2="650"/>
+</svg>
