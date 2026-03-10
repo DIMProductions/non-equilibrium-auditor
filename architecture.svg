@@ -10,8 +10,8 @@
    <path d="m0 0 10 3-10 3z" fill="#94a3b8"/>
   </marker>
  </defs>
- <rect x="1.4211e-14" width="1100" height="800" fill="#333" fill-rule="evenodd" stroke-width="3.6275" style="paint-order:fill markers stroke"/>
- <text class="title" x="536" y="40">Non-Equilibrium Event Auditor Architecture</text>
+ <rect x="1.4211e-14" width="1100" height="800" fill-rule="evenodd" stroke-width="3.6275" style="paint-order:fill markers stroke"/>
+ <text class="title" x="258" y="40">Non-Equilibrium Event Auditor Architecture</text>
  <!-- Input -->
  <rect class="box" x="436" y="80" width="200" height="60"/>
  <text class="text" x="536" y="110">Multichannel Signals</text>
