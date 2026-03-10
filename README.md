@@ -9,8 +9,7 @@ Instead of relying on black-box machine learning models, this system combines DS
 ---
 
 ## The "Death Signal" Origin
-
-The project was born from a biological hypothesis: *Do systems—cells or organisms—emit a specific "signal" at the exact moment of structural collapse or death?*.
+The project was born from a biological hypothesis: *Do systems—cells or organisms—emit a specific physical 'signal' at the exact moment of structural collapse or death?*.
 
 While this started with a "Death Signal" concept, it evolved into a rigorous engineering tool for detecting **short-lived non-equilibrium transitions** embedded in heavy noise. Whether it is infrastructure failure, physiological collapse, or machine breakdown, this tool audits the "moment of decay" with precision.
 
@@ -18,20 +17,19 @@ While this started with a "Death Signal" concept, it evolved into a rigorous eng
 
 ## System Architecture
 
+![system architecture diagram](architecture.svg)
+
 The pipeline separates signal analysis into two conceptual branches to isolate the event from the environment.
 
 ### LF Branch — Environmental Monitoring
-
 Tracks slow behavior like baseline drift, long-term oscillations, and interference. It acts as a **noise map** to help dismiss environmental "fake" events.
 
 ### HF Branch — Transition Extraction
-
 Searches for rapid structural changes. It evaluates candidates using metrics like local SNR, irreversibility, and persistence.
 
 ---
 
 ## Event Metrics
-
 Each candidate is evaluated using interpretable metrics:
 
 * **P_snr**: Local signal contrast against surrounding noise.
@@ -44,17 +42,13 @@ Each candidate is evaluated using interpretable metrics:
 ## Components
 
 ### 1. Python Engine (`death_audit_v15.py`)
-
-The core backend that processes raw multi-channel data.
-
+The core backend that processes raw multi-channel data. 
 * **DSP Armor**: Features specialized filtering to handle drift, 50Hz hum, and DC offsets without destroying the target signal.
 * **Triage**: Ranks and classifies events into categories like `HIGH`, `LOW_A_CANDIDATE`, or `LOW_B1_SYMMETRIC_ARTIFACT`.
 * **Exporter**: Generates `result.json` for visual auditing.
 
 ### 2. Interactive UI (`index.html`)
-
 A browser-based analysis interface to visualize and verify detected events.
-
 * **Capabilities**: Load `result.json`, run browser-side "Quick Audits" on raw CSVs, or generate synthetic signals to test the algorithm.
 
 ---
@@ -62,11 +56,10 @@ A browser-based analysis interface to visualize and verify detected events.
 ## Quick Start
 
 ### Step 1: Run the Analysis
-
 Execute the Python pipeline to process your data and generate a result file.
-
 ```bash
 python death_audit_v15.py
+
 
 ```
 
