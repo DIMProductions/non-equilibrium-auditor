@@ -19,6 +19,7 @@ Many real-world systems remain in a **stable basin** until a perturbation pushes
 ---
 
 ## System Architecture
+![system architecture diagram](architecture.svg)
 
 The pipeline separates signal analysis into a **Dual Branch** architecture to isolate the event from its environment.
 
