@@ -1,50 +1,152 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="1100" height="800" font-family="Arial" version="1.1" viewBox="0 0 1100 800" xmlns="http://www.w3.org/2000/svg">
- <style>.box { fill:#0f172a; stroke:#60a5fa; stroke-width:2; rx:8; }
-.text { fill:white; font-size:16px; text-anchor:middle; dominant-baseline:middle; }
-.title { fill:white; font-size:26px; font-weight:bold; }
-.arrow { stroke:#94a3b8; stroke-width:2; marker-end:url(#arrow); }
-.branch { stroke:#22c55e; stroke-width:2; marker-end:url(#arrow); }</style>
+<svg width="1200" height="820" version="1.1" viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg">
  <defs>
-  <marker id="arrow" markerHeight="10" markerWidth="10" orient="auto" refX="10" refY="3">
-   <path d="m0 0 10 3-10 3z" fill="#94a3b8"/>
+  <linearGradient id="bgGrad" x2="0" y2="1">
+   <stop stop-color="#0b1020" offset="0"/>
+   <stop stop-color="#111827" offset="1"/>
+  </linearGradient>
+  <linearGradient id="landGrad" x2="0" y2="1">
+   <stop stop-color="#38bdf8" stop-opacity=".2" offset="0"/>
+   <stop stop-color="#22c55e" stop-opacity=".1" offset="1"/>
+  </linearGradient>
+  <linearGradient id="collapseGrad">
+   <stop stop-color="#38bdf8" offset="0"/>
+   <stop stop-color="#f59e0b" offset=".5"/>
+   <stop stop-color="#ef4444" offset="1"/>
+  </linearGradient>
+  <marker id="arrow" markerHeight="12" markerWidth="12" orient="auto" refX="10" refY="6">
+   <path d="m0 0 12 6-12 6z" fill="#94a3b8"/>
   </marker>
+  <filter id="softGlow" x="-1.0286" y="-1.0286" width="3.0571" height="3.0571">
+   <feGaussianBlur result="blur" stdDeviation="6"/>
+   <feMerge>
+    <feMergeNode in="blur"/>
+    <feMergeNode in="SourceGraphic"/>
+   </feMerge>
+  </filter>
+  <style>.title { fill:#f8fafc; font: 700 30px Arial, Helvetica, sans-serif; }
+      .subtitle { fill:#cbd5e1; font: 400 16px Arial, Helvetica, sans-serif; }
+      .panelTitle { fill:#f8fafc; font: 700 20px Arial, Helvetica, sans-serif; }
+      .label { fill:#e5e7eb; font: 600 14px Arial, Helvetica, sans-serif; }
+      .small { fill:#cbd5e1; font: 400 13px Arial, Helvetica, sans-serif; }
+      .tiny { fill:#94a3b8; font: 400 12px Arial, Helvetica, sans-serif; }
+      .box { fill:#0f172a; stroke:#334155; stroke-width:1.5; rx:14; }
+      .axis { stroke:#64748b; stroke-width:1.5; }
+      .grid { stroke:#1f2937; stroke-width:1; }
+      .arrowLine { stroke:#94a3b8; stroke-width:2; marker-end:url(#arrow); fill:none; }
+      .cyan { stroke:#38bdf8; fill:none; stroke-width:4; }
+      .amber { stroke:#f59e0b; fill:none; stroke-width:4; }
+      .red { stroke:#ef4444; fill:none; stroke-width:4; }
+      .green { stroke:#22c55e; fill:none; stroke-width:4; }
+      .dotStable { fill:#22c55e; }
+      .dotMeta { fill:#f59e0b; }
+      .dotCollapse { fill:#ef4444; }
+      .legendText { fill:#e5e7eb; font: 500 13px Arial, Helvetica, sans-serif; dominant-baseline: middle; }</style>
  </defs>
- <rect x="1.4211e-14" width="1100" height="800" fill-rule="evenodd" stroke-width="3.6275" style="paint-order:fill markers stroke"/>
- <text class="title" x="258" y="40">Non-Equilibrium Event Auditor Architecture</text>
- <!-- Input -->
- <rect class="box" x="436" y="80" width="200" height="60"/>
- <text class="text" x="536" y="110">Multichannel Signals</text>
- <!-- Preprocessing -->
- <rect class="box" x="436" y="180" width="200" height="60"/>
- <text class="text" x="536" y="210">DSP Preprocessing</text>
- <line class="arrow" x1="536" x2="536" y1="140" y2="180"/>
- <!-- Branch split -->
- <line class="branch" x1="536" x2="236" y1="240" y2="300"/>
- <line class="branch" x1="536" x2="836" y1="240" y2="300"/>
- <!-- LF -->
- <rect class="box" x="106" y="300" width="260" height="80"/>
- <text class="text" x="236" y="335">LF Branch</text>
- <text class="text" x="236" y="360">Environmental Monitoring</text>
- <!-- HF -->
- <rect class="box" x="706" y="300" width="260" height="80"/>
- <text class="text" x="836" y="335">HF Branch</text>
- <text class="text" x="836" y="360">Transition Extraction</text>
- <!-- Metrics -->
- <rect class="box" x="706" y="420" width="260" height="100"/>
- <text class="text" x="836" y="450">Event Metrics</text>
- <text class="text" x="836" y="480">P_snr</text>
- <text class="text" x="836" y="505">T_irreversibility</text>
- <text class="text" x="836" y="542">hit_windows</text>
- <line class="arrow" x1="836" x2="836" y1="380" y2="420"/>
- <!-- Classification -->
- <rect class="box" x="406" y="540" width="260" height="80"/>
- <text class="text" x="536" y="575">Event Classification</text>
- <text class="text" x="536" y="600">HIGH / ARTIFACT / DRIFT</text>
- <line class="arrow" x1="836" x2="536" y1="520" y2="540"/>
- <!-- Output -->
- <rect class="box" x="406" y="650" width="260" height="80"/>
- <text class="text" x="536" y="685">Audited Event</text>
- <text class="text" x="536" y="710">Winner / Supporting / Noise</text>
- <line class="arrow" x1="536" x2="536" y1="620" y2="650"/>
+ <rect width="1200" height="820" fill="url(#bgGrad)"/>
+ <text class="title" x="60" y="55">Structural Collapse as a Non-Equilibrium Transition</text>
+ <text class="subtitle" x="60" y="84">A conceptual figure for time-series event auditing: stable regime → transition zone → collapse event </text>
+ <!-- Top left panel -->
+ <rect class="box" x="50" y="120" width="520" height="290"/>
+ <text class="panelTitle" x="75" y="155">A. Energy Landscape View</text>
+ <!-- Axes -->
+ <line class="axis" x1="95" x2="525" y1="365" y2="365"/>
+ <line class="axis" x1="110" x2="110" y1="340" y2="180"/>
+ <text class="tiny" x="470" y="388" font-family="Arial, Helvetica, sans-serif" font-size="12px" font-weight="400" style="line-height:normal">system state</text>
+ <text class="tiny" transform="rotate(-90)" x="-190" y="40" font-family="Arial, Helvetica, sans-serif" font-size="12px" font-weight="400" style="line-height:normal">effective potential</text>
+ <!-- Stable basin -->
+ <path d="m120 235c45-10 85 5 115 45 20 28 40 48 70 50s55-20 75-52c30-50 75-66 135-43" fill="none" stroke="#38bdf8" stroke-width="5"/>
+ <!-- filled landscape -->
+ <path d="m120 235c45-10 85 5 115 45 20 28 40 48 70 50s55-20 75-52c30-50 75-66 135-43v130h-395z" fill="url(#landGrad)" opacity=".8"/>
+ <!-- stable point -->
+ <circle class="dotStable" cx="305" cy="330" r="8" filter="url(#softGlow)"/>
+ <text class="label" x="255" y="350">stable basin</text>
+ <!-- metastable barrier -->
+ <circle class="dotMeta" cx="390" cy="265" r="8" filter="url(#softGlow)"/>
+ <text class="label" x="415" y="257" font-family="Arial, Helvetica, sans-serif" font-size="14px" font-weight="600" style="line-height:normal">barrier crossing</text>
+ <!-- collapse arrow -->
+ <path class="arrowLine" d="m320 320c30-10 50-25 70-50"/>
+ <!-- right collapse basin -->
+ <path class="arrowLine" d="m390 270c40 20 70 50 110 78"/>
+ <circle class="dotCollapse" cx="500" cy="348" r="8" filter="url(#softGlow)"/>
+ <text class="label" x="445" y="324" font-family="Arial, Helvetica, sans-serif" font-size="14px" font-weight="600" style="line-height:normal">collapsed regime</text>
+ <!-- Top right panel -->
+ <rect class="box" x="620" y="120" width="530" height="290"/>
+ <text class="panelTitle" x="645" y="155">B. Time-Series Signature</text>
+ <!-- grid -->
+ <line class="axis" x1="665" x2="1110" y1="355" y2="355"/>
+ <line class="axis" x1="680" x2="680" y1="340" y2="185"/>
+ <text class="tiny" x="1065" y="380">time</text>
+ <text class="tiny" transform="rotate(-90)" x="-183" y="610" font-family="Arial, Helvetica, sans-serif" font-size="12px" font-weight="400" style="line-height:normal">signal structure</text>
+ <line class="grid" x1="720" x2="720" y1="185" y2="355"/>
+ <line class="grid" x1="800" x2="800" y1="185" y2="355"/>
+ <line class="grid" x1="880" x2="880" y1="185" y2="355"/>
+ <line class="grid" x1="960" x2="960" y1="185" y2="355"/>
+ <line class="grid" x1="1040" x2="1040" y1="185" y2="355"/>
+ <!-- waveform -->
+ <path d="m690 285c25-5 50 5 70 1s45 3 65-1c20-5 40 3 60-1s40 2 55-14c12-15 18-38 28-60s22-2 32 40 25 62 45 70 40 10 60 6" fill="none" stroke="url(#collapseGrad)" stroke-width="5"/>
+ <!-- stage zones -->
+ <rect x="690" y="190" width="235" height="150" rx="10" fill="#22c55e" opacity=".05"/>
+ <rect x="925" y="190" width="70" height="150" rx="10" fill="#f59e0b" opacity=".08"/>
+ <rect x="995" y="190" width="110" height="150" rx="10" fill="#ef4444" opacity=".08"/>
+ <g font-family="Arial, Helvetica, sans-serif" font-size="14px" font-weight="600">
+  <text class="label" x="755.64929" y="193.76122" style="line-height:normal">stable regime</text>
+  <text class="label" x="934.19031" y="193.80971" style="line-height:normal">transition</text>
+  <text class="label" x="1027.4291" y="192.82466" style="line-height:normal">collapse</text>
+ </g>
+ <circle class="dotMeta" cx="950" cy="235" r="7" filter="url(#softGlow)"/>
+ <circle class="dotCollapse" cx="1e3" cy="250" r="7" filter="url(#softGlow)"/>
+ <g font-family="Arial, Helvetica, sans-serif" font-size="13px" font-weight="400">
+  <text class="small" x="887" y="251" style="line-height:normal">precursor</text>
+  <text class="small" x="1020" y="257" style="line-height:normal">winner event</text>
+  <text class="small" transform="translate(10.596 7.947)" x="630" y="425" style="inline-size:510.931;line-height:normal;white-space:pre" xml:space="preserve"><tspan x="630" y="425">Interpretation: transition-like asymmetry and persistence rise near the regime break, </tspan><tspan x="630" y="441.25">while artifacts must be rejected to avoid mislabeling noise as a structural event.</tspan></text>
+  <!-- Bottom full panel -->
+ </g>
+ <rect class="box" x="50" y="485" width="1100" height="310"/>
+ <text class="panelTitle" x="75" y="520" font-family="Arial, Helvetica, sans-serif" font-size="20px" font-weight="700" style="line-height:normal">C. Audit Pipeline</text>
+ <!-- pipeline boxes -->
+ <rect class="box" x="85" y="575" width="145" height="60"/>
+ <text class="label" x="157.5" y="605" font-family="Arial, Helvetica, sans-serif" font-size="14px" font-weight="600" text-anchor="middle" style="line-height:normal">Multichannel</text>
+ <text class="small" x="157.5" y="625" font-family="Arial, Helvetica, sans-serif" font-size="13px" font-weight="400" text-anchor="middle" style="line-height:normal">signals</text>
+ <rect class="box" x="270" y="575" width="145" height="60"/>
+ <text class="label" x="342.5" y="605" font-family="Arial, Helvetica, sans-serif" font-size="14px" font-weight="600" text-anchor="middle" style="line-height:normal">DSP</text>
+ <text class="small" x="342.5" y="625" font-family="Arial, Helvetica, sans-serif" font-size="13px" font-weight="400" text-anchor="middle" style="line-height:normal">preprocessing</text>
+ <rect class="box" x="455" y="555" width="155" height="100"/>
+ <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+  <text class="label" x="532.5" y="585" font-size="14px" font-weight="600" style="line-height:normal">Dual Branch</text>
+  <text class="small" x="532.5" y="610" font-size="13px" font-weight="400" style="line-height:normal">LF: environment map</text>
+  <text class="small" x="532.5" y="632" font-size="13px" font-weight="400" style="line-height:normal">HF: transition scan</text>
+ </g>
+ <rect class="box" x="650" y="555" width="165" height="100"/>
+ <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+  <text class="label" x="732.5" y="583" font-size="14px" font-weight="600" style="line-height:normal">Event Metrics</text>
+  <text class="small" x="732.5" y="608" font-size="13px" font-weight="400" style="line-height:normal">P_snr / irreversibility</text>
+  <text class="small" x="732.5" y="630" font-size="13px" font-weight="400" style="line-height:normal">persistence / artifact ratios</text>
+ </g>
+ <rect class="box" x="855" y="555" width="175" height="100"/>
+ <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+  <text class="label" x="942.5" y="583" font-size="14px" font-weight="600" style="line-height:normal">Audit + Classification</text>
+  <text class="small" x="942.5" y="608" font-size="13px" font-weight="400" style="line-height:normal">winner / precursor</text>
+  <text class="small" x="942.5" y="630" font-size="13px" font-weight="400" style="line-height:normal">artifact / environment / weak</text>
+  <!-- arrows -->
+ </g>
+ <line class="arrowLine" x1="230" x2="270" y1="605" y2="605"/>
+ <line class="arrowLine" x1="415" x2="455" y1="605" y2="605"/>
+ <line class="arrowLine" x1="610" x2="650" y1="605" y2="605"/>
+ <line class="arrowLine" x1="815" x2="855" y1="605" y2="605"/>
+ <g font-family="Arial, Helvetica, sans-serif" font-size="13px" font-weight="400">
+  <!-- output notes -->
+  <text class="small" x="88" y="690" style="line-height:normal">Core idea: not just anomaly scoring, but interpretable event auditing for non-equilibrium transitions.</text>
+  <text class="small" x="88" y="715" style="line-height:normal">The system separates real transition candidates from symmetric artifacts, narrowband contamination, and environmental drift.</text>
+  <text class="small" x="88" y="750" style="line-height:normal">This makes the output discussable, inspectable, and debuggable across infrastructure, industrial, and biomedical time-series domains.</text>
+  <!-- legend -->
+ </g>
+ <circle class="dotStable" cx="875" cy="735" r="7"/>
+ <text class="legendText" x="892" y="735" font-family="Arial, Helvetica, sans-serif" font-size="13px" font-weight="500" style="line-height:normal">stable</text>
+ <circle class="dotMeta" cx="960" cy="735" r="7"/>
+ <text class="legendText" x="977" y="735" font-family="Arial, Helvetica, sans-serif" font-size="13px" font-weight="500" style="line-height:normal">transition</text>
+ <circle class="dotCollapse" cx="1065" cy="735" r="7"/>
+ <text class="legendText" x="1082" y="735" font-family="Arial, Helvetica, sans-serif" font-size="13px" font-weight="500" style="line-height:normal">collapse</text>
+ <text fill="#000000" fill-rule="evenodd" font-family="'Frank Ruehl CLM'" font-size="10.667px" stroke-width="3.7795" style="paint-order:fill markers stroke;shape-inside:url(#rect56);text-orientation:auto;white-space:pre" xml:space="preserve"/>
+ <text transform="translate(29.635 -4.8035)" fill="#cbd5e1" fill-rule="evenodd" font-family="Arial, Helvetica, sans-serif" font-size="13.333px" stroke-width="3.7795" style="paint-order:fill markers stroke;shape-inside:url(#rect57);white-space:pre" xml:space="preserve"><tspan x="30.462891" y="435.85183">Interpretation: the monitored system remains in a stable basin until perturbation and </tspan><tspan x="30.462891" y="452.51845">asymmetry push it across a barrier, producing a transition that can be audited as a </tspan><tspan x="30.462891" y="469.18508">structural collapse event.</tspan></text>
 </svg>
