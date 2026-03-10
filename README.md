@@ -4,77 +4,64 @@
 
 `non-equilibrium-auditor` is an experimental toolkit designed to detect and audit **non-equilibrium transitions** and **structural collapse events** in complex, noisy multi-channel time-series data.
 
-Instead of relying on black-box machine learning models, this system combines DSP-based filtering, structural physical metrics, and artifact auditing into a transparent, explainable pipeline.
+Unlike traditional anomaly detection, this system focuses on the **regime break**—the moment a system crosses a stability barrier and enters a collapsed state.
 
 ---
 
-## The "Death Signal" Origin
-The project was born from a biological hypothesis: *Do systems—cells or organisms—emit a specific physical 'signal' at the exact moment of structural collapse or death?*.
+## Concept: Structural Collapse
 
-While this started with a "Death Signal" concept, it evolved into a rigorous engineering tool for detecting **short-lived non-equilibrium transitions** embedded in heavy noise. Whether it is infrastructure failure, physiological collapse, or machine breakdown, this tool audits the "moment of decay" with precision.
+Many real-world systems remain in a **stable basin** until a perturbation pushes them across a **barrier**. This transition is rarely a simple spike; it is a structural shift characterized by:
+
+* **Precursor Activity**: Subtle signs of instability before the main break.
+* **Winner Event**: The primary transition that marks the regime shift.
+* **Non-Equilibrium Asymmetry**: A physical "arrow of time" that makes the collapse irreversible.
 
 ---
 
 ## System Architecture
 
-![system architecture diagram](architecture.svg)
+The pipeline separates signal analysis into a **Dual Branch** architecture to isolate the event from its environment.
 
-The pipeline separates signal analysis into two conceptual branches to isolate the event from the environment.
+### LF Branch — Environment Map
 
-### LF Branch — Environmental Monitoring
-Tracks slow behavior like baseline drift, long-term oscillations, and interference. It acts as a **noise map** to help dismiss environmental "fake" events.
+Tracks slow environmental behavior, baseline drift, and long-term oscillations. It acts as a reference map to ensure environmental noise isn't mislabeled as a structural event.
 
-### HF Branch — Transition Extraction
-Searches for rapid structural changes. It evaluates candidates using metrics like local SNR, irreversibility, and persistence.
+### HF Branch — Transition Scan
+
+Searches for rapid structural changes. This branch evaluates potential candidates using metrics like local SNR, irreversibility, and persistence.
+
+---
+
+## Audit & Classification
+
+Detected candidates are categorized into a discussable and inspectable hierarchy:
+
+* **Winner**: The strongest candidate transition near the target window.
+* **Precursor**: Supporting transitions that precede the main event.
+* **Artifact / Environment / Noise**: Rejected candidates based on symmetric artifacts, narrowband contamination, or long-term drift.
 
 ---
 
 ## Event Metrics
-Each candidate is evaluated using interpretable metrics:
+
+Each event is audited using interpretable physical metrics:
 
 * **P_snr**: Local signal contrast against surrounding noise.
-* **T_irreversibility**: Measures the "arrow of time" asymmetry between the rising and falling phases of an event.
-* **hit_windows**: Persistence indicator; counts how many adjacent windows support the event.
-* **Ratio_MirrorSym**: Detects symmetric artifacts often produced by mechanical sensor errors or DSP side-effects.
+* **T_irreversibility**: Measures the transition-like asymmetry between rising and falling phases.
+* **Persistence**: Counts supporting adjacent windows (`hit_windows`) to ensure the event has physical substance.
+* **Artifact Ratios**: Rejects symmetric patterns (`Ratio_MirrorSym`) often produced by sensor glitches or DSP side-effects.
 
 ---
 
 ## Components
 
 ### 1. Python Engine (`death_audit_v15.py`)
-The core backend that processes raw multi-channel data. 
-* **DSP Armor**: Features specialized filtering to handle drift, 50Hz hum, and DC offsets without destroying the target signal.
-* **Triage**: Ranks and classifies events into categories like `HIGH`, `LOW_A_CANDIDATE`, or `LOW_B1_SYMMETRIC_ARTIFACT`.
-* **Exporter**: Generates `result.json` for visual auditing.
+
+The core backend that processes raw multi-channel data and ranks events.
 
 ### 2. Interactive UI (`index.html`)
-A browser-based analysis interface to visualize and verify detected events.
-* **Capabilities**: Load `result.json`, run browser-side "Quick Audits" on raw CSVs, or generate synthetic signals to test the algorithm.
 
----
-
-## Quick Start
-
-### Step 1: Run the Analysis
-Execute the Python pipeline to process your data and generate a result file.
-```bash
-python death_audit_v15.py
-
-
-```
-
-### Step 2: Open the Audit UI
-
-Open `index.html` in your browser. Then:
-
-1. Load the generated `result.json`.
-2. Or use the **Synthetic Generator** to see how the auditor handles drift and noise in real-time.
-
----
-
-## Project Goal
-
-This project asks a fundamental research question: *Can complex transitions be audited in a way that remains interpretable?*. It is an open exploration of structural decay, from infrastructure to complex systems research.
+A browser-based analysis dashboard to visualize, verify, and audit detected events without additional software.
 
 ---
 
